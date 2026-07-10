@@ -1,0 +1,27 @@
+#!/bin/bash
+set -e
+
+BACKUP_DIR="/opt/backups/postgres"
+DATE=$(date +%Y%m%d_%H%M%S)
+FILENAME="logtail_${DATE}.sql.gz"
+RETENTION_DAYS=30
+
+echo "[$(date)] Starting backup: $FILENAME"
+
+# Dump + compress
+docker exec infra-db-1 pg_dump -U logtail logtail | gzip > "$BACKUP_DIR/$FILENAME"
+
+# Verifica che il file non sia vuoto
+SIZE=$(stat -c%s "$BACKUP_DIR/$FILENAME")
+if [ "$SIZE" -lt 1000 ]; then
+  echo "[$(date)] ERROR: backup file too small ($SIZE bytes), something went wrong"
+  exit 1
+fi
+
+echo "[$(date)] Backup completed: $FILENAME ($SIZE bytes)"
+
+# Elimina backup più vecchi di 30 giorni
+DELETED=$(find "$BACKUP_DIR" -name "*.sql.gz" -mtime +$RETENTION_DAYS -delete -print | wc -l)
+echo "[$(date)] Deleted $DELETED old backups"
+
+echo "[$(date)] Done."

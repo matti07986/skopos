@@ -1,0 +1,13 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <clipPath id="sq">
+      <rect x="10" y="10" width="44" height="44" rx="12" transform="rotate(45 32 32)"/>
+    </clipPath>
+  </defs>
+  <rect x="10" y="10" width="44" height="44" rx="12" transform="rotate(45 32 32)" fill="#4ade80"/>
+  <g clip-path="url(#sq)">
+    <path d="M-4 22 Q10 10 24 22 T52 22 T80 22" stroke="#0a0a0a" stroke-width="9" stroke-linecap="round" fill="none"/>
+    <path d="M-4 36 Q10 24 24 36 T52 36 T80 36" stroke="#0a0a0a" stroke-width="9" stroke-linecap="round" fill="none"/>
+    <path d="M-4 50 Q10 38 24 50 T52 50 T80 50" stroke="#0a0a0a" stroke-width="9" stroke-linecap="round" fill="none"/>
+  </g>
+</svg>

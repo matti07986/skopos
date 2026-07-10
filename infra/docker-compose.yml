@@ -1,0 +1,133 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    command:
+      - "postgres"
+      - "-c"
+      - "config_file=/etc/postgresql/postgresql.conf"
+    environment:
+      POSTGRES_USER: logtail
+      POSTGRES_PASSWORD: logtail
+      POSTGRES_DB: logtail
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./postgres/postgresql.conf:/etc/postgresql/postgresql.conf:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U logtail"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  worker:
+    # Background workers (pattern_worker, alert_worker, ai_worker, ecc.).
+    # Single-process by design: pattern_worker uses a fixed Redis consumer
+    # name 'pattern-worker-1' which collides when run from multiple
+    # gunicorn worker processes. Keeping this as 1 container = 1 process
+    # eliminates that race and lets us scale api throughput independently.
+    build:
+      context: ../apps/api
+      dockerfile: Dockerfile
+    image: infra-api
+    restart: unless-stopped
+    command: python -m app.workers_main
+    env_file:
+      - ../apps/api/.env
+    environment:
+      DATABASE_URL: postgresql://logtail:logtail@db:5432/logtail
+      REDIS_URL: redis://redis:6379
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 128M
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    # ── Production tuning ─────────────────────────────────────────────
+    # maxmemory 512m: hard ceiling on Redis RSS, prevents OOM eviction of
+    #   other containers under sustained load. The box has 4GB total and
+    #   Redis only holds cache + streams (no persistent business data).
+    # allkeys-lru: evict least-recently-used keys when full, doesn't
+    #   matter whether they have an explicit TTL or not. Streams self-trim
+    #   via XADD MAXLEN elsewhere, so we don't lose log events.
+    # save '': disable RDB snapshots — we use Redis as a cache, durability
+    #   is not required, and avoiding fork() under load eliminates a class
+    #   of latency spikes.
+    command: >
+      redis-server
+      --maxmemory 512mb
+      --maxmemory-policy allkeys-lru
+      --save ""
+      --appendonly no
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build:
+      context: ../apps/api
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8000:8000"
+    env_file:
+      - ../apps/api/.env
+    environment:
+      DATABASE_URL: postgresql://logtail:logtail@db:5432/logtail
+      REDIS_URL: redis://redis:6379
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ../apps/api:/app
+    command: sh -c "alembic upgrade head && exec gunicorn app.main:app --workers 2 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000 --timeout 60 --keep-alive 5 --max-requests 10000 --max-requests-jitter 1000 --graceful-timeout 30 --access-logfile - --error-logfile -"
+
+  web:
+    build:
+      context: ../apps/web
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: https://novatrace.dev/api
+    restart: always
+    ports:
+      - "3000:3000"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    depends_on:
+      - api
+    networks:
+      - default
+
+volumes:
+  db_data:
+  redis_data:

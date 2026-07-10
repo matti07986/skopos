@@ -1,0 +1,16 @@
+{
+  "name": "skopos-sdk",
+  "version": "0.1.0",
+  "description": "Official JavaScript/TypeScript SDK for Skopos log monitoring",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc"
+  },
+  "keywords": ["logging", "monitoring", "skopos"],
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

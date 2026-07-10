@@ -1,0 +1,36 @@
+[Wed Jun  3 10:00:01 AM UTC 2026] Starting backup: logtail_20260603_100001.sql.gz
+[Wed Jun  3 10:00:01 AM UTC 2026] Backup completed: logtail_20260603_100001.sql.gz (665342 bytes)
+[Wed Jun  3 10:00:01 AM UTC 2026] Deleted 0 old backups
+[Wed Jun  3 10:00:01 AM UTC 2026] Done.
+[Thu Jun  4 10:00:01 AM UTC 2026] Starting backup: logtail_20260604_100001.sql.gz
+[Thu Jun  4 10:00:02 AM UTC 2026] Backup completed: logtail_20260604_100001.sql.gz (792227 bytes)
+[Thu Jun  4 10:00:02 AM UTC 2026] Deleted 0 old backups
+[Thu Jun  4 10:00:02 AM UTC 2026] Done.
+[Fri Jun  5 10:00:01 AM UTC 2026] Starting backup: logtail_20260605_100001.sql.gz
+[Fri Jun  5 10:00:01 AM UTC 2026] Backup completed: logtail_20260605_100001.sql.gz (972118 bytes)
+[Fri Jun  5 10:00:01 AM UTC 2026] Deleted 0 old backups
+[Fri Jun  5 10:00:01 AM UTC 2026] Done.
+[Sat Jun  6 10:00:01 AM UTC 2026] Starting backup: logtail_20260606_100001.sql.gz
+[Sat Jun  6 10:00:02 AM UTC 2026] Backup completed: logtail_20260606_100001.sql.gz (1154489 bytes)
+[Sat Jun  6 10:00:02 AM UTC 2026] Deleted 0 old backups
+[Sat Jun  6 10:00:02 AM UTC 2026] Done.
+[Sun Jun  7 10:00:01 AM UTC 2026] Starting backup: logtail_20260607_100001.sql.gz
+[Sun Jun  7 10:00:02 AM UTC 2026] Backup completed: logtail_20260607_100001.sql.gz (1337941 bytes)
+[Sun Jun  7 10:00:02 AM UTC 2026] Deleted 0 old backups
+[Sun Jun  7 10:00:02 AM UTC 2026] Done.
+[Mon Jun  8 10:00:01 AM UTC 2026] Starting backup: logtail_20260608_100001.sql.gz
+[Mon Jun  8 10:00:02 AM UTC 2026] Backup completed: logtail_20260608_100001.sql.gz (1521695 bytes)
+[Mon Jun  8 10:00:02 AM UTC 2026] Deleted 0 old backups
+[Mon Jun  8 10:00:02 AM UTC 2026] Done.
+[Tue Jun  9 10:00:01 AM UTC 2026] Starting backup: logtail_20260609_100001.sql.gz
+[Tue Jun  9 10:00:02 AM UTC 2026] Backup completed: logtail_20260609_100001.sql.gz (1704221 bytes)
+[Tue Jun  9 10:00:02 AM UTC 2026] Deleted 0 old backups
+[Tue Jun  9 10:00:02 AM UTC 2026] Done.
+[Wed Jun 10 10:00:01 AM UTC 2026] Starting backup: logtail_20260610_100001.sql.gz
+[Wed Jun 10 10:00:02 AM UTC 2026] Backup completed: logtail_20260610_100001.sql.gz (1887664 bytes)
+[Wed Jun 10 10:00:02 AM UTC 2026] Deleted 0 old backups
+[Wed Jun 10 10:00:02 AM UTC 2026] Done.
+[Thu Jun 11 10:00:01 AM UTC 2026] Starting backup: logtail_20260611_100001.sql.gz
+[Thu Jun 11 10:00:02 AM UTC 2026] Backup completed: logtail_20260611_100001.sql.gz (2069979 bytes)
+[Thu Jun 11 10:00:02 AM UTC 2026] Deleted 0 old backups
+[Thu Jun 11 10:00:02 AM UTC 2026] Done.

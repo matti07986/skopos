@@ -1,0 +1,62 @@
+# Environment secrets — NEVER commit
+.env
+.env.*
+!.env.example
+*.env
+*.env.*
+!.env.example
+!**/.env.example
+
+# Backups from previous rotations
+*.bak
+*.bak.*
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Node
+node_modules/
+.next/
+out/
+.turbo/
+dist/
+build/
+*.tsbuildinfo
+
+# Docker / infra
+*.log
+logs/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Test artifacts
+tests/load/*.log
+tests/load/ingest-results.json
+tests/load/results-*.json
+
+# Local uploads / temp
+/tmp/
+uploads/
+
+# Safety: never commit git backups even if they appear in the working tree
+.git.backup*
+.git-backup*
+.git.bak*
+
+# Safety: never commit env-files-DO-NOT-SHARE from previous sessions
+env-files-DO-NOT-SHARE/
+skopos-backup-*/

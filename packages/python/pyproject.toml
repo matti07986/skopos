@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "skopos-sdk"
+version = "0.1.0"
+description = "Official Python SDK for Skopos log monitoring"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.8"
+keywords = ["logging", "monitoring", "skopos"]
+
+[project.urls]
+Homepage = "https://skopos.ink"
+Repository = "https://github.com/matti07986/logtail-saas"

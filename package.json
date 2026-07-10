@@ -1,0 +1,16 @@
+{
+  "name": "logtail",
+  "private": true,
+  "scripts": {
+    "dev:web": "pnpm --filter @logtail/web dev",
+    "build": "pnpm --filter @logtail/sdk build && pnpm --filter @logtail/web build",
+    "test": "cd apps/api && pytest tests/"
+  },
+  "pnpm": {
+    "overrides": {}
+  },
+  "workspaces": [
+    "apps/web",
+    "packages/sdk-node"
+  ]
+}
