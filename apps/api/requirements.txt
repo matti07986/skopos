@@ -5,7 +5,7 @@ pydantic==2.9.2
 email-validator==2.2.0
 pydantic-settings==2.14.1
 asyncpg==0.29.0
-sqlalchemy[asyncio]==2.0.30
+sqlalchemy[asyncio]==2.0.51
 alembic==1.18.4
 redis==5.0.4
 anthropic==0.26.0
