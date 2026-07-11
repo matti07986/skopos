@@ -1,111 +1,115 @@
 # Skopos
 
-> Boring log infrastructure. Smart AI on top.
+**Real-time log monitoring with AI-powered insights.**  
+Self-hostable. EU-native. Built by one person.
 
-A log monitoring SaaS for indie developers and small teams. Reliable ingestion, fast search, sensible retention — plus an AI chat layer on top, so you can actually understand what's happening in your services.
-
-**The primary interface for understanding your logs is a chat box, not a search bar.**
-
-[skopos.ink](https://skopos.ink) • [Pricing](https://skopos.ink/pricing) • [Status](https://status.skopos.ink) • [Docs](https://docs.skopos.ink)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/)
+[![Next.js 15](https://img.shields.io/badge/Next.js-15-black.svg)](https://nextjs.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-async-teal.svg)](https://fastapi.tiangolo.com/)
+[![Postgres 16](https://img.shields.io/badge/Postgres-16-336791.svg)](https://www.postgresql.org/)
 
 ---
 
-## Features
+Skopos ingests logs from your application at 2,000+ events/sec, groups similar errors into patterns, and asks Claude to explain the likely root cause — before you go looking through raw logs.
 
-- 🔍 **Full-text search** across all your logs, with filters that don't fight you
-- 💬 **Chat with your logs** — natural-language questions, answers grounded in your actual data (RAG over your logs with Claude)
-- 🚨 **Alerts** — get pinged on patterns that matter, with rate-limit baked in so you're not paged by your own retries
-- 📊 **Auto-insights** — Skopos surfaces unusual patterns and frequent error signatures automatically
-- 👥 **Team sharing** — read-only project sharing, per-project access control
-- 📈 **Status pages** — public uptime / incident reports for your users (one-toggle setup)
-- 🔌 **SDKs in JavaScript and Python** plus a universal HTTP ingest endpoint
+Not a chatbot. Not a Datadog replacement. A focused tool for indie developers and small teams who want to know *what broke* without paying enterprise prices.
 
-## Quick start
+## Why it exists
 
-Pick your language and ship a log in 30 seconds.
+Every log monitoring tool I looked at either treated AI as a marketing bullet (chat-with-your-logs, deep magical insights) or ignored it entirely.
 
-### JavaScript / TypeScript
+I wanted to build the honest middle: log ingestion done well, and Claude doing exactly one job — reading a small set of clustered errors and telling you what probably went wrong. No agentic auto-fixes. No 300ms response requirements. Just useful analysis, cached per pattern, cheap enough to run.
 
-```bash
-npm install @skopos/sdk
-```
+This is a portfolio project. I built it to learn, to ship something end-to-end, and to have a real system I could point to when someone asks *"what have you built?"*.
 
-```typescript
-import { Skopos } from "@skopos/sdk";
+## What it does
 
-const log = new Skopos({ token: process.env.SKOPOS_TOKEN });
+- **Ingest** logs at 2,000+ events/sec from any language (Python + JS SDKs available)
+- **Cluster** similar errors into patterns via fingerprinting (level + service + message hash)
+- **Analyze** each new pattern once with Claude Sonnet 4.6, cache the result
+- **Alert** on threshold breaches (rule-based, no LLM in the alerting path)
+- **Detect** anomalies statistically (no LLM either — cheap and fast)
+- **Retain** logs configurably (7 to 180 days depending on tier)
+- **Show** everything in a clean Next.js dashboard
 
-log.info("Order placed", { orderId, userId, amount });
-log.error("Payment failed", { error: err.message, orderId });
+## What it deliberately doesn't do
 
-// Flush before process exit (long-running apps don't need this)
-process.on("beforeExit", () => log.shutdown());
-```
+- **No chat with your logs.** The AI runs once per unique error pattern, not per query. This keeps costs bounded and predictable.
+- **No auto-remediation.** Skopos suggests. Humans decide.
+- **No Datadog/Sentry replacement.** No APM, no distributed tracing, no browser monitoring. Just logs, well-monitored.
+- **No LLM in the alert path.** Alerts are threshold-based and fast. LLMs only run on new pattern analysis, out-of-band.
+- **No unlimited data retention.** Even paying users get 180 days max.
 
-### Python
-
-```bash
-pip install skopos-sdk
-```
-
-```python
-from skopos import Skopos
-
-log = Skopos(token=os.environ["SKOPOS_TOKEN"])
-
-log.info("Order placed", order_id=order_id, user_id=user_id, amount=amount)
-log.error("Payment failed", error=str(err), order_id=order_id)
-```
-
-### HTTP ingest (any language)
-
-```bash
-curl -X POST https://api.skopos.ink/v1/ingest \
-  -H "X-Skopos-Key: $SKOPOS_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '[{"level":"error","message":"payment failed","service":"checkout"}]'
-```
-
-Sign up at [skopos.ink](https://skopos.ink) to get your token (free tier, no credit card).
-
-## Pricing
-
-| Plan         | Price        | Events/hr | Projects   | Retention | AI insights / mo |
-|--------------|--------------|-----------|------------|-----------|------------------|
-| **Starter**  | Free forever | 10k       | 1          | 7 days    | 20               |
-| **Indie**    | €22/mo       | 100k      | 3          | 21 days   | unlimited        |
-| **Pro**      | €59/mo       | 500k      | 10         | 60 days   | unlimited        |
-| **Business** | €169/mo      | 5M        | unlimited  | 90 days   | unlimited        |
-
-Full details at [skopos.ink/pricing](https://skopos.ink/pricing).
+## Architecture
+The API and worker containers are separate processes. This lets us scale HTTP throughput (multiple gunicorn workers) independently from background workers (single instance, avoids Redis consumer name collisions).
 
 ## Tech stack
 
-- **Frontend**: Next.js 15, React, Tailwind CSS, deployed on Vercel
-- **Backend**: FastAPI (Python 3.12), PostgreSQL + TimescaleDB, Redis
-- **AI**: Claude (Anthropic) via RAG over the user's own logs
-- **Infra**: Hetzner (backend), Cloudflare (DNS / CDN / Email Routing)
-- **Billing**: Lemon Squeezy (merchant of record — VAT handled for us)
+| Layer     | Technology                                    |
+|-----------|-----------------------------------------------|
+| Frontend  | Next.js 15 · React 18 · Tailwind · TypeScript |
+| Backend   | FastAPI · Python 3.12 · SQLAlchemy async      |
+| Storage   | Postgres 16 · Redis 7                         |
+| AI        | Anthropic Claude Sonnet 4.6                   |
+| Deploy    | Docker Compose · Hetzner (Frankfurt, EU)      |
+| SDKs      | Python (PyPI) · JavaScript (npm)              |
 
-## SDKs
+## Engineering highlights
 
-| Language              | Package                                                        | Source           |
-|-----------------------|----------------------------------------------------------------|------------------|
-| JavaScript/TypeScript | [`@skopos/sdk`](https://www.npmjs.com/package/@skopos/sdk)     | `packages/js`    |
-| Python                | [`skopos-sdk`](https://pypi.org/project/skopos-sdk/)           | `packages/py`    |
-| Go                    | planned                                                        | —                |
+The numbers below come from a production load test using `k6` against the real infrastructure (single Hetzner CPX21 instance, 4 GB RAM, 4 vCPU).
 
-## Status & support
+- **2,140 events/sec sustained ingest** at 0.00% error rate under 3-minute peak load
+- **Bulk insert pattern worker**: 10× throughput improvement over one-commit-per-event baseline (248 → 2,140 eps)
+- **Durability guarantees**: PEL recovery + XAUTOCLAIM ensures at-least-once delivery even if the worker crashes mid-batch
+- **Shared Redis connection pool**: replaced per-request client lifecycle, cut p95 latency from 8.8s to 1.5s under stress
+- **user.plan cache**: 60-second Redis TTL eliminated a per-request DB roundtrip, dropped p50 latency by 65%
+- **Worker container separation**: fixed a race condition where two gunicorn workers competed for the same Redis consumer name
+- **Full production hardening**: rate limits (nginx zones + app-level), retry with exponential backoff on Anthropic 429/5xx, PostgreSQL tuned for the workload, Redis capped at 512 MB with allkeys-lru eviction
 
-- 🟢 Service status: [status.skopos.ink](https://status.skopos.ink)
-- 📖 Documentation: [docs.skopos.ink](https://docs.skopos.ink)
-- ✉️ Support: [support@skopos.ink](mailto:support@skopos.ink)
+## Getting started
 
-## Contributing
+You need Docker Compose. Everything else runs in containers.
 
-Skopos is mostly closed-source — it's a SaaS — but the SDKs under `packages/*` are MIT-licensed and PRs are welcome. For bugs or feature requests on the main product, please [open an issue](https://github.com/matti07986/skopos/issues) or email support.
+```bash
+# 1. Clone
+git clone https://github.com/matti07986/skopos.git
+cd skopos
+
+# 2. Configure
+cp apps/api/.env.example apps/api/.env
+# Edit apps/api/.env with your own values:
+#   - ANTHROPIC_API_KEY (required for AI insights)
+#   - DATABASE_URL, REDIS_URL (defaults work with docker-compose)
+#   - JWT_SECRET_KEY (generate with: openssl rand -hex 32)
+
+# 3. Run
+docker compose -f infra/docker-compose.yml up -d
+
+# 4. Open
+open http://localhost:3000
+```
+
+First user to register becomes admin.
+
+## Repository layout
+## Status
+
+**Portfolio project.** Not accepting paying users, no SLA, no support commitments.
+
+The code is here if you want to:
+- Study a full-stack async Python + Next.js system
+- Self-host log monitoring for a personal project
+- Fork and build something similar
+
+If you want to reach out about this project (feedback, questions, hiring), open an issue or contact me directly.
 
 ## License
 
-- SDKs (`packages/*`): MIT
-- Main product (`apps/*`, `infra/*`): proprietary
+MIT. See [LICENSE](LICENSE).
+
+## Author
+
+Built by [Mattia Garello](https://github.com/matti07986) — solo dev, still finishing university.
+
+Live demo available on request.
