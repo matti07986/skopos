@@ -64,7 +64,7 @@ export function middleware(request: NextRequest) {
     // The secret stays server-side (this code is bundled into the Edge function,
     // never shipped to the browser), and the repo is private.
     const adminSecret =
-      (process.env.PRE_LAUNCH_ADMIN_SECRET || "a86800d73f1e10f1ebd096209875986c").trim();
+      (process.env.PRE_LAUNCH_ADMIN_SECRET || "").trim();
     if (adminParam === adminSecret) {
       const response = NextResponse.redirect(cleanUrl);
       response.cookies.set(ADMIN_COOKIE_NAME, "true", {
